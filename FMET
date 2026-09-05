@@ -1,0 +1,283 @@
+L#!/bin/bash
+
+# Variable
+FMET_DIR=/sdcard/FMET
+output=$FMET_DIR/output
+mkdir -p $output
+
+# Debugging
+if [ "$2" = "D" ] || [ "$2" = "d" ] || [ "$2" = "Debug" ] || [ "$2" = "DEBUG" ] || [ "$2" = "debug" ]; then
+  CMD=ffmpeg
+elif [ "$2" = "!" ]; then
+  CMD=ffpb
+else
+  CMD=ffpb
+fi
+
+# Function
+BANNER() {
+echo -e "\e[1;34m"
+cat << EOF
+███████╗███╗   ███╗███████╗████████╗
+██╔════╝████╗ ████║██╔════╝╚══██╔══╝
+█████╗  ██╔████╔██║█████╗     ██║   
+██╔══╝  ██║╚██╔╝██║██╔══╝     ██║   
+██║     ██║ ╚═╝ ██║███████╗   ██║   
+╚═╝     ╚═╝     ╚═╝╚══════╝   ╚═╝   
+EOF
+echo -e "\e[0;0m"
+}
+
+# AV1
+FMET_AV1() {
+# Extension 
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video extension"
+echo -e "\e[1;32mmp4, mkv, avi, webm\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read ext
+echo -e "───────────────────────────────────────────────"
+
+# Bitrate
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video bitrate"
+echo -e "\e[1;32mauto, 100K, 1000K, 1M, 10M\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read bitrate
+echo -e "───────────────────────────────────────────────"
+
+# Start 
+for file in $FMET_DIR/*.$ext; do
+# Output file
+ f=$(basename "$file")
+  out_file="$output/$f"
+# Bitrate 
+ if [ $bitrate = auto ]; then
+   $CMD -hide_banner -i "$file" -c:v av1_mediacodec -c:a copy "$out_file"
+  else
+   $CMD -hide_banner -i "$file" -c:v av1_mediacodec -b:v $bitrate -c:a copy "$out_file"
+ fi
+done
+
+# Scan media
+termux-media-scan -r $output 1> /dev/null
+}
+
+# High Efficiency Video Coding (H.265) 
+FMET_HEVC() {
+# Extension 
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video extension"
+echo -e "\e[1;32mmp4, mkv, avi, webm\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read ext
+echo -e "───────────────────────────────────────────────"
+
+# Bitrate
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video bitrate"
+echo -e "\e[1;32mauto, 100K, 1000K, 1M, 10M\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read bitrate
+echo -e "───────────────────────────────────────────────"
+
+# Start 
+for file in $FMET_DIR/*.$ext; do
+# Output file
+ f=$(basename "$file")
+  out_file="$output/$f"
+# Bitrate 
+ if [ $bitrate = auto ]; then
+   $CMD -hide_banner -i "$file" -c:v hevc_mediacodec -c:a copy "$out_file"
+  else
+   $CMD -hide_banner -i "$file" -c:v hevc_mediacodec -b:v $bitrate -c:a copy "$out_file"
+ fi
+done
+
+# Scan media
+termux-media-scan -r $output 1> /dev/null
+}
+
+# Advanced Video Coding (H.264)
+FMET_AVC() {
+# Extension 
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video extension"
+echo -e "\e[1;32mmp4, mkv, avi, webm\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read ext
+echo -e "───────────────────────────────────────────────"
+
+# Bitrate
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video bitrate"
+echo -e "\e[1;32mauto, 100K, 1000K, 1M, 10M\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read bitrate
+echo -e "───────────────────────────────────────────────"
+
+# Start 
+for file in $FMET_DIR/*.$ext; do
+# Output file
+ f=$(basename "$file")
+  out_file="$output/$f"
+# Bitrate 
+ if [ $bitrate = auto ]; then
+   $CMD -hide_banner -i "$file" -c:v h264_mediacodec -c:a copy "$out_file"
+  else
+   $CMD -hide_banner -i "$file" -c:v h264_mediacodec -b:v $bitrate -c:a copy "$out_file"
+ fi
+done
+
+# Scan media
+termux-media-scan -r $output 1> /dev/null
+}
+
+# SSIM
+FMET_SSIM() {
+# Extension 
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput video extension"
+echo -e "\e[1;32mmp4, mkv, avi, webm\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read ext
+echo -e "───────────────────────────────────────────────"
+
+# Start
+for file in $FMET_DIR/*.$ext; do
+# Output file
+ f=$(basename "$file")
+   ffmpeg -hide_banner -i "$file" -i "$output/$f" -an -lavfi "ssim" -f null /dev/null 2>&1 | tee "$output/${f%.*}_SSIM.log"
+done
+} 
+
+# Advanced/Manual
+FMET_ADV() {
+
+# Input Extension 
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput extension"
+echo -e "\e[1;32mmp4, mkv, mp3, jpg, etc\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read i_ext
+
+# Output extension
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mOutput extension"
+echo -e "\e[1;32mmp4, mkv, mp3, jpg\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read o_ext
+
+# Operation
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mInput FFmpeg operation"
+echo -e "\e[1;32mContoh:" 
+echo -e "-i \$file -s 128x720 -c:v libx264 -c:a aac \$out_file \e[0;0m"
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mVariable list:"
+echo -e "\e[1;32m"
+cat << 'EOF'
+$file = full path file input
+$f = file input
+$n = file input tanpa extension 
+$i_ext = Input extension
+$o_ext = Output extension 
+$out_file = full path file output
+$output = full path output directory
+$FMET_DIR = full path FMET directory di Memory Internal (/sdcard/FMET)
+EOF
+echo -e "\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+read -r -a CMD_OPS
+
+# Start 
+for file in $FMET_DIR/*.$i_ext; do
+f=$(basename "$file")
+n=${f%.*}
+out_file="$output/$n.$o_ext"
+  $CMD "${FMET_OPS[@]}"
+done
+
+# Scan media
+termux-media-scan -r $output 1> /dev/null
+}
+
+# Bantuan 
+HELP() {
+clear
+BANNER
+echo -e "───────────────────────────────────────────────"
+echo -e "FFmpeg MediaCodec Encoder Termux"
+echo -e "───────────────────────────────────────────────"
+cat << EOF
+Simpan file di Memory Internal 
+dalam folder FMET (/sdcard/FMET).
+Ketik FMET <target codec>
+FMET harus HURUF BESAR.
+EOF
+echo -e "\e[1;34mContoh: \e[1;32mFMET HEVC"
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mCodec list:" 
+echo -e "\e[1;32mAV1, HEVC/H265, AVC/H264"
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;34mOperation list:" 
+echo -e "\e[1;32m"
+cat << EOF
+S, SSIM = Cek Structural Similarity Index Measure (SSIM)
+Untuk membandingkan video hasil Encoder dengan video asli.
+FMET akan otomatis menampilkan full log FFmpeg di Mode ini. 
+Dalam holder output juga akan tersimpan nama_file_SSIM.log
+
+A, M, ADV, MANUAL = Mode Advanced atau Manual.
+Digunakan untuk user yang paham menggunakan FFmpeg. 
+Tanpa limitasi, tersedia juga berbagai Variable yang bisa digunakan. 
+
+D, DEBUG = Debugging
+Tambahkan di akhir untuk menampilkan full log FFmpeg. 
+Contoh:
+FMET AV1 DEBUG
+FMET HEVC D
+FMET A D
+
+H, HELP, <Invalid option> = Menampilkan bantuan ini.
+EOF
+echo -e "───────────────────────────────────────────────"
+echo -e "\e[1;93m"
+cat << EOF
+NOTE: FMET menggunakan 
+API Android MediaCodec Hardware Acceleration. 
+Codec, kecepatan Encoder/FPS tergantung SoC/Implementasi OS Smartphone masing-masing.
+mungkin akan terjadi error di video dengan resolusi abc atau di video dengan FPS 123, atau di Codec xyz.
+Kualitas video/compression akan berbeda di SoC abc, Smartphone xyz. 
+Kombinasi akan menghasilkan kecepatan encoder/kualitas/compression yang berbeda. 
+Codec, bitrate auto/manual akan berbeda antara SoC abc dan Smartphone xyz 
+Silakan coba kombinasi Codec abc dan bitrate auto, atau manual dari 1M sampai sekian M di Smartphone masing-masing. 
+EOF
+echo -e "\e[0;0m"
+echo -e "───────────────────────────────────────────────"
+}
+
+# Execute
+clear
+BANNER
+
+echo -e "\e[0:0m"
+echo -e "───────────────────────────────────────────────"
+echo -e "📅 $(date '+%A, %d %B %Y - %I:%M:%S %p') ⏰"
+echo -e "───────────────────────────────────────────────"
+
+if [ $1 = AV1 ] || [ $1 = av1 ]; then
+  FMET_AV1
+ elif [ $1 = HEVC ] || [ $1 = hevc ] || [ $1 = H265 ] || [ $1 = h265 ]; then
+  FMET_HEVC
+ elif [ $1 = AVC ] || [ $1 = avc ] || [ $1 = H264 ] || [ $1 = h264 ]; then
+  FMET_AVC
+ elif [ $1 = SSIM ] || [ $1 = ssim ] || [ $1 = S ] || [ $1 = s ]; then
+   FMET_SSIM
+elif [ $1 = A ] || [ $1 = a ] || [ $1 = M ] || [ $1 = m ] || [ $1 = ADV ] || [ $1 = adv ] || [ $1 = MANUAL ] || [ $1 = Manual ] || [ $1 = manual ]; then
+  FMET_ADV
+elif [ $1 = H ] || [ $1 = h ] || [ $1 = HELP ] || [ $1 = help ]; then
+  HELP
+ else
+  HELP
+fi
