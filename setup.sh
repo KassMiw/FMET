@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Prepare
-termux-setup-storage
+termux-setup-storage -y
 apt update && apt upgrade -y
 
 # Install package
