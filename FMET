@@ -195,7 +195,7 @@ for file in $FMET_DIR/*.$i_ext; do
 f=$(basename "$file")
 n=${f%.*}
 out_file="$output/$n.$o_ext"
-  $CMD "${FMET_OPS[@]}"
+  $CMD "${CMD_OPS[@]}"
 done
 
 # Scan media
